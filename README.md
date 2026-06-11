@@ -1,34 +1,39 @@
 # 🚀 Task Manager API
 
-A secure Task Management REST API built with **Django REST Framework**, **JWT Authentication**, and **Role-Based Access Control (RBAC)**.
+A secure and role-based **Task Management REST API** built with **Django REST Framework**, **JWT Authentication**, and **Role-Based Access Control (RBAC)**.
+
+This project allows users to register, log in using JWT tokens, and manage personal tasks. Admin users can manage all tasks, while normal users can only manage their own tasks.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- 🔐 User Registration, Login & JWT Refresh
-- 👥 Role-Based Access Control: Admin / User
-- 📋 Task CRUD Operations
-- ✅ Mark Task Complete / Incomplete
-- 📚 Pagination
-- 🔎 Filtering, Search & Ordering
-- 🧪 Unit Tests
-- ⚙️ Role Setup Management Command
+* 🔐 JWT Authentication (Register, Login, Refresh)
+* 👥 Role-Based Access Control (Admin/User)
+* 📋 Task CRUD Operations
+* ✅ Task Status Management
+* 📅 Due Date Support
+* 📚 Pagination, Filtering, Search & Ordering
+* 🧪 Unit Testing
+* 🐳 Docker Support
+* ⚙️ Automated Role Setup Command
 
 ---
 
 ## 🛠️ Tech Stack
 
-- Python 3.11
-- Django 5.2
-- Django REST Framework
-- Simple JWT
-- SQLite
-- Django Filter
+* Python 3.11
+* Django 5.2
+* Django REST Framework
+* Simple JWT
+* SQLite
+* Django Filter
+* Docker
+* Docker Compose
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Local Setup Instructions
 
 ### 1. Clone Repository
 
@@ -45,8 +50,16 @@ python -m venv env
 
 ### 3. Activate Virtual Environment
 
+Windows:
+
 ```bash
 env\Scripts\activate
+```
+
+Linux / Mac:
+
+```bash
+source env/bin/activate
 ```
 
 ### 4. Install Dependencies
@@ -61,10 +74,17 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-### 6. Create Roles
+### 6. Create Default Roles
 
 ```bash
 python manage.py setup_roles
+```
+
+This command creates the required user roles:
+
+```text
+Admin
+User
 ```
 
 ### 7. Start Development Server
@@ -79,156 +99,313 @@ Server runs at:
 http://127.0.0.1:8000/
 ```
 
-🐳 Docker Setup
-### Build Containers
+---
+
+# 🐳 Docker Setup
+
+This project includes Docker support for running the application in a consistent environment.
+
+### 1. Build Docker Image
+
+```bash
 docker compose build
+```
 
-### Start Containers
+### 2. Start Container
+
+```bash
 docker compose up
+```
 
-### Run Migrations
+Server runs at:
+
+```text
+http://localhost:8000/
+```
+
+### 3. Run Migrations Inside Docker
+
+```bash
 docker compose exec web python manage.py migrate
+```
 
-### Create Superuser
+### 4. Create Roles Inside Docker
+
+```bash
+docker compose exec web python manage.py setup_roles
+```
+
+### 5. Create Superuser Inside Docker
+
+```bash
 docker compose exec web python manage.py createsuperuser
+```
 
-### View Logs
+### 6. Run Tests Inside Docker
+
+```bash
+docker compose exec web python manage.py test
+```
+
+### 7. View Docker Logs
+
+```bash
 docker compose logs -f
+```
 
-### Server:
+### 8. Stop Containers
 
-http://localhost:8000
+```bash
+docker compose down
+```
 
- -----
+---
 
-## 🔐 Authentication APIs
+# 🔐 Authentication APIs
 
-### Register User
+## 1. Register User
 
 ```http
 POST /api/auth/register/
 ```
 
-Request:
+### Request Body
 
 ```json
 {
-    "username": "user1",
-    "email": "user1@gmail.com",
-    "password": "User@123"
+  "username": "user1",
+  "email": "user1@gmail.com",
+  "password": "User@123"
 }
 ```
 
-### Login and Get JWT Tokens
+### Success Response
+
+```json
+{
+  "id": 1,
+  "username": "user1",
+  "email": "user1@gmail.com"
+}
+```
+
+---
+
+## 2. Login User
 
 ```http
 POST /api/auth/login/
 ```
 
-Request:
+### Request Body
 
 ```json
 {
-    "username": "user1",
-    "password": "User@123"
+  "username": "user1",
+  "password": "User@123"
 }
 ```
 
-Response:
+### Success Response
 
 ```json
 {
-    "refresh": "<refresh_token>",
-    "access": "<access_token>"
+  "refresh": "your_refresh_token",
+  "access": "your_access_token"
 }
 ```
 
+The `access` token is used to access protected APIs.
+The `refresh` token is used to generate a new access token.
 
-### Refresh Access Token
+---
+
+## 3. Refresh Access Token
 
 ```http
 POST /api/auth/refresh/
 ```
 
-Request:
+### Request Body
 
 ```json
 {
-    "refresh": "<refresh_token>"
+  "refresh": "your_refresh_token"
 }
 ```
 
+### Success Response
 
-## 🔑 Using JWT Token
-
-For all protected task APIs, pass the access token in headers:
-
-```http
-Authorization: Bearer <access_token>
+```json
+{
+  "access": "new_access_token"
+}
 ```
-
-
-## 📋 Task APIs
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/tasks/` | List tasks |
-| POST | `/api/tasks/` | Create task |
-| GET | `/api/tasks/<id>/` | Retrieve task |
-| PUT | `/api/tasks/<id>/` | Full update task |
-| PATCH | `/api/tasks/<id>/` | Partial update task |
-| DELETE | `/api/tasks/<id>/` | Delete task |
 
 ---
 
-## ➕ Create Task Example
+# 🔑 JWT Usage
+
+All task APIs are protected. Send the access token in the request header:
+
+```http
+Authorization: Bearer your_access_token
+```
+
+Example:
+
+```bash
+curl -X GET http://localhost:8000/api/tasks/ \
+-H "Authorization: Bearer your_access_token"
+```
+
+---
+
+## 📋 Task APIs
+
+┌────────┬──────────────────────┬───────────────┬─────────────────────────┐
+│ Method │ Endpoint             │ Access        │ Description             │
+├────────┼──────────────────────┼───────────────┼─────────────────────────┤
+│ GET    │ /api/tasks/          │ Authenticated │ List tasks              │
+│ POST   │ /api/tasks/          │ Authenticated │ Create a new task       │
+│ GET    │ /api/tasks/<id>/     │ Owner/Admin   │ Retrieve a single task  │
+│ PUT    │ /api/tasks/<id>/     │ Owner/Admin   │ Fully update a task     │
+│ PATCH  │ /api/tasks/<id>/     │ Owner/Admin   │ Partially update a task │
+│ DELETE │ /api/tasks/<id>/     │ Owner/Admin   │ Delete a task           │
+└────────┴──────────────────────┴───────────────┴─────────────────────────┘
+```
+
+## ➕ Create Task
 
 ```http
 POST /api/tasks/
 ```
 
-Request:
+### Request Body
 
 ```json
 {
-    "title": "Learn DRF",
-    "description": "Complete Task Manager API",
-    "status": false,
-    "due_date": "2026-06-30"
+  "title": "Learn Django REST Framework",
+  "description": "Build and test Task Manager API",
+  "status": false,
+  "due_date": "2026-06-30"
 }
 ```
 
+### Success Response
 
-## 👥 Roles and Permissions
+```json
+{
+  "id": 1,
+  "title": "Learn Django REST Framework",
+  "description": "Build and test Task Manager API",
+  "status": false,
+  "due_date": "2026-06-30",
+  "owner": 1,
+  "created_at": "2026-06-11T12:00:00Z",
+  "updated_at": "2026-06-11T12:00:00Z"
+}
+```
 
-### 🛡️ Admin
+---
 
-- Can view all users' tasks
-- Can create tasks
-- Can update any task
-- Can delete any task
+## 📖 List Tasks
 
-### 👤 User
+```http
+GET /api/tasks/
+```
 
-- Can create own tasks
-- Can view only own tasks
-- Can update only own tasks
-- Can delete only own tasks
+### Behavior
 
+* Admin users can view all users' tasks.
+* Normal users can view only their own tasks.
 
-## ⚙️ Assign Admin Role
+---
 
-Create groups:
+## ✏️ Update Task
+
+```http
+PATCH /api/tasks/1/
+```
+
+### Request Body
+
+```json
+{
+  "status": true
+}
+```
+
+This can be used to mark a task as complete.
+
+---
+
+## ❌ Delete Task
+
+```http
+DELETE /api/tasks/1/
+```
+
+### Success Response
+
+```text
+204 No Content
+```
+
+---
+
+# 👥 Roles and Permissions
+
+## 🛡️ Admin Role
+
+Admin users can:
+
+* View all users' tasks
+* Create tasks
+* Update any task
+* Delete any task
+* Filter tasks by owner
+
+## 👤 User Role
+
+Normal users can:
+
+* Create their own tasks
+* View only their own tasks
+* Update only their own tasks
+* Delete only their own tasks
+
+Users cannot access or modify tasks created by other users.
+
+---
+
+# ⚙️ Assign Admin Role
+
+### 1. Run Role Setup Command
 
 ```bash
 python manage.py setup_roles
 ```
 
-Assign Admin role manually:
+For Docker:
+
+```bash
+docker compose exec web python manage.py setup_roles
+```
+
+### 2. Open Django Shell
 
 ```bash
 python manage.py shell
 ```
+
+For Docker:
+
+```bash
+docker compose exec web python manage.py shell
+```
+
+### 3. Assign Admin Group
 
 ```python
 from django.contrib.auth.models import User, Group
@@ -238,44 +415,54 @@ admin_group = Group.objects.get(name="Admin")
 user.groups.add(admin_group)
 ```
 
-## 📚 Pagination
+---
+
+# 📚 Pagination
 
 ```http
 GET /api/tasks/?page=1
 ```
 
-Example response:
+### Example Response
 
 ```json
 {
-    "count": 12,
-    "next": "http://127.0.0.1:8000/api/tasks/?page=2",
-    "previous": null,
-    "results": []
+  "count": 12,
+  "next": "http://localhost:8000/api/tasks/?page=2",
+  "previous": null,
+  "results": []
 }
 ```
 
+---
 
-## 🔎 Filtering
+# 🔎 Filtering
 
-Filter by status:
+## Filter Completed Tasks
 
 ```http
 GET /api/tasks/?status=true
 ```
 
+## Filter Incomplete Tasks
+
 ```http
 GET /api/tasks/?status=false
 ```
 
-Filter by owner, Admin only:
+## Filter by Owner
+
+Admin only:
 
 ```http
 GET /api/tasks/?owner=1
 ```
 
+Normal users should not use owner filtering to access other users' tasks.
 
-## 🔍 Search
+---
+
+# 🔍 Search
 
 Search tasks by title or description:
 
@@ -283,52 +470,160 @@ Search tasks by title or description:
 GET /api/tasks/?search=django
 ```
 
+Example:
 
-## ↕️ Ordering
+```http
+GET /api/tasks/?search=api
+```
 
-Order by due date:
+---
+
+# ↕️ Ordering
+
+## Order by Due Date
 
 ```http
 GET /api/tasks/?ordering=due_date
 ```
 
-Order by newest created:
+## Order by Latest Created
 
 ```http
 GET /api/tasks/?ordering=-created_at
 ```
 
+## Order by Oldest Created
 
-## 🧪 Run Tests
+```http
+GET /api/tasks/?ordering=created_at
+```
+
+---
+
+# 🧪 Running Tests
+
+## Local Test Command
 
 ```bash
 python manage.py test
 ```
 
+## Docker Test Command
+
+```bash
+docker compose exec web python manage.py test
+```
+
 Test coverage includes:
 
-- Authentication APIs
-- JWT login and refresh
-- Task model
-- Task CRUD operations
-- RBAC permissions
+* User registration
+* JWT login
+* JWT refresh
+* Task model
+* Task CRUD operations
+* Owner-based task access
+* Admin role permissions
+* User role restrictions
 
 ---
 
-## 📌 API Testing Tools
+# 🧪 API Testing with PowerShell
 
-You can test this API using:
+## Login
 
-- Postman
-- Thunder Client
-- Insomnia
-- DRF Browsable API
+```powershell
+$body = @{
+    username = "user1"
+    password = "User@123"
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+    -Uri "http://localhost:8000/api/auth/login/" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $body
+
+$token = $response.access
+```
+
+## Get Tasks
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:8000/api/tasks/" `
+    -Method Get `
+    -Headers @{ Authorization = "Bearer $token" }
+```
+
+## Create Task
+
+```powershell
+$task = @{
+    title = "Docker Testing"
+    description = "Created from PowerShell"
+    status = $false
+    due_date = "2026-06-30"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://localhost:8000/api/tasks/" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Headers @{ Authorization = "Bearer $token" } `
+    -Body $task
+```
 
 ---
 
-## 👨‍💻 Author
+# 📌 API Testing Tools
 
-**Tharun Sathunuru**  
+You can test the API using:
+
+* Postman
+* Thunder Client
+* Insomnia
+* DRF Browsable API
+* PowerShell Invoke-RestMethod
+
+---
+
+# ✅ Final Verification
+
+Before submitting, verify:
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+For Docker:
+
+```bash
+docker compose exec web python manage.py check
+docker compose exec web python manage.py test
+```
+
+Expected result:
+
+```text
+System check identified no issues
+Ran all tests successfully
+OK
+```
+
+---
+
+# 📦 Submission
+
+GitHub Repository:
+
+```text
+https://github.com/Tharun-301/Task_Manager_API
+```
+
+---
+
+# 👨‍💻 Author
+
+**Tharun Sathunuru**
 Aspiring Python Backend Developer
-
----
