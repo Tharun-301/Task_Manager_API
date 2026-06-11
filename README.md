@@ -481,7 +481,6 @@ GET /api/tasks/?ordering=-created_at
 ```http
 GET /api/tasks/?ordering=created_at
 ```
-
 ---
 
 # 🧪 Running Tests
@@ -497,67 +496,6 @@ python manage.py test
 ```bash
 docker compose exec web python manage.py test
 ```
-
-Test coverage includes:
-
-* User registration
-* JWT login
-* JWT refresh
-* Task model
-* Task CRUD operations
-* Owner-based task access
-* Admin role permissions
-* User role restrictions
-
----
-
-# 🧪 API Testing with PowerShell
-
-## Login
-
-```powershell
-$body = @{
-    username = "user1"
-    password = "User@123"
-} | ConvertTo-Json
-
-$response = Invoke-RestMethod `
-    -Uri "http://localhost:8000/api/auth/login/" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Body $body
-
-$token = $response.access
-```
-
-## Get Tasks
-
-```powershell
-Invoke-RestMethod `
-    -Uri "http://localhost:8000/api/tasks/" `
-    -Method Get `
-    -Headers @{ Authorization = "Bearer $token" }
-```
-
-## Create Task
-
-```powershell
-$task = @{
-    title = "Docker Testing"
-    description = "Created from PowerShell"
-    status = $false
-    due_date = "2026-06-30"
-} | ConvertTo-Json
-
-Invoke-RestMethod `
-    -Uri "http://localhost:8000/api/tasks/" `
-    -Method Post `
-    -ContentType "application/json" `
-    -Headers @{ Authorization = "Bearer $token" } `
-    -Body $task
-```
-
----
 
 # 📌 API Testing Tools
 
