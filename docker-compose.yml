@@ -1,0 +1,24 @@
+services:
+  web:
+    # Build from the Dockerfile in the current directory
+    build: .
+
+    # Map your machine's port 8000 → container's port 8000
+    # Format: "host_port:container_port"
+    ports:
+      - "8000:8000"
+
+    # Mount current directory into /app so code changes reflect without rebuild
+    volumes:
+      - .:/app
+
+    # Pass environment variables into the container
+    # These override / supplement what's in your .env file
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=docker-dev-secret-key-change-in-production
+      - ALLOWED_HOSTS=127.0.0.1,localhost,0.0.0.0
+
+    # Override the Dockerfile's CMD for development
+    # This command runs when you do: docker compose up
+    command: python manage.py runserver 0.0.0.0:8000
