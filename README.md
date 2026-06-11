@@ -259,22 +259,6 @@ curl -X GET http://localhost:8000/api/tasks/ \
 -H "Authorization: Bearer your_access_token"
 ```
 
----
-
-## 📋 Task APIs
-
-┌────────┬──────────────────────┬───────────────┬─────────────────────────┐
-│ Method │ Endpoint             │ Access        │ Description             │
-├────────┼──────────────────────┼───────────────┼─────────────────────────┤
-│ GET    │ /api/tasks/          │ Authenticated │ List tasks              │
-│ POST   │ /api/tasks/          │ Authenticated │ Create a new task       │
-│ GET    │ /api/tasks/<id>/     │ Owner/Admin   │ Retrieve a single task  │
-│ PUT    │ /api/tasks/<id>/     │ Owner/Admin   │ Fully update a task     │
-│ PATCH  │ /api/tasks/<id>/     │ Owner/Admin   │ Partially update a task │
-│ DELETE │ /api/tasks/<id>/     │ Owner/Admin   │ Delete a task           │
-└────────┴──────────────────────┴───────────────┴─────────────────────────┘
-```
-
 ## ➕ Create Task
 
 ```http
